@@ -1,0 +1,110 @@
+name: Build and Deploy Bitcraft Wiki to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - production
+        - staging
+      build_mode:
+        description: 'Build mode'
+        required: false
+        default: 'normal'
+        type: choice
+        options:
+        - normal
+        - clean
+      debug:
+        description: 'Enable debug mode'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Display manual run parameters
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "🚀 Manual deployment triggered"
+          echo "Environment: ${{ github.event.inputs.environment }}"
+          echo "Build mode: ${{ github.event.inputs.build_mode }}"
+          echo "Debug mode: ${{ github.event.inputs.debug }}"
+          
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        with:
+          static_site_generator: gatsby
+          
+      - name: Restore cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            public
+            .cache
+          key: ${{ runner.os }}-gatsby-build-${{ hashFiles('public') }}
+          restore-keys: |
+            ${{ runner.os }}-gatsby-build-
+            
+      - name: Clean Gatsby cache (if clean mode)
+        if: github.event.inputs.build_mode == 'clean'
+        run: npm run clean
+        
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build with Gatsby
+        run: npm run build -- --prefix-paths
+        env:
+          NODE_ENV: ${{ github.event.inputs.environment || 'production' }}
+          GATSBY_EXPERIMENTAL_PAGE_BUILD_ON_DATA_CHANGES: ${{ github.event.inputs.debug == 'true' && 'true' || 'false' }}
+          
+      - name: Debug - List build output
+        if: github.event.inputs.debug == 'true'
+        run: |
+          echo "Build completed. Contents of public directory:"
+          ls -la public/
+          echo "Total size:"
+          du -sh public/
+          
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: ./public
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v3

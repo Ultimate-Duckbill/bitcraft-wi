@@ -12,7 +12,8 @@
     "build": "gatsby build",
     "serve": "gatsby serve",
     "clean": "gatsby clean",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "deploy": "gatsby build --prefix-paths && gh-pages -d public"
   },
   "dependencies": {
     "@mdx-js/react": "^2.3.0",
@@ -37,6 +38,7 @@
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
     "gatsby-plugin-emotion": "^8.14.0",
+    "gh-pages": "^6.1.0",
     "twin.macro": "^3.4.1",
     "typescript": "^5.3.3"
   }

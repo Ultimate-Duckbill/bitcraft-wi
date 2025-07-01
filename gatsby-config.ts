@@ -1,4 +1,12 @@
 module.exports = {
+  pathPrefix: process.env.NODE_ENV === 'production' ? '/bitcraft-wiki' : '',
+  
+  siteMetadata: {
+    title: 'Bitcraft Wiki',
+    description: 'Bitcraft crafting recipe database and TODO planner',
+    siteUrl: 'https://yuehara.github.io/bitcraft-wiki', // GitHubユーザー名に合わせて変更してください
+  },
+  
   /* Your site config here */
   plugins: [
     'gatsby-plugin-postcss',
