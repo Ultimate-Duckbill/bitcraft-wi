@@ -1,5 +1,6 @@
 import React from "react";
 import { useCrafting } from "../context/CraftingContext";
+import { withPrefix } from "gatsby";
 
 export type ItemType = {
   id: number;
@@ -20,7 +21,7 @@ const ItemCard: React.FC<{ item: ItemType }> = ({ item }) => {
     if (!iconName) return null;
     // .pngが含まれていない場合は追加
     const iconWithExtension = iconName.endsWith('.png') ? iconName : `${iconName}.png`;
-    return `/Assets/${iconWithExtension}`;
+    return withPrefix(`/Assets/${iconWithExtension}`);
   };
 
   const iconPath = getIconPath(item.icon);

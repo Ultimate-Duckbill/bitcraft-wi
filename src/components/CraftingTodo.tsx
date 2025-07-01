@@ -1,6 +1,7 @@
 import React from 'react';
 import { useCrafting, MaterialRequirement } from '../context/CraftingContext';
 import MaterialCard from './MaterialCard';
+import { withPrefix } from 'gatsby';
 
 // Intermediate Materials コンポーネントを分離
 const IntermediateMaterialsSection: React.FC<{
@@ -84,7 +85,7 @@ const CraftingTodo: React.FC = () => {
   const getIconPath = (iconName?: string) => {
     if (!iconName) return null;
     const iconWithExtension = iconName.endsWith('.png') ? iconName : `${iconName}.png`;
-    return `/Assets/${iconWithExtension}`;
+    return withPrefix(`/Assets/${iconWithExtension}`);
   };
 
   if (todoItems.length === 0) {

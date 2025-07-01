@@ -27,6 +27,13 @@ module.exports = {
         path: `${__dirname}/src/data/`, // crafting_data.jsonのあるディレクトリ
       },
     },
+    {
+      resolve: `gatsby-source-filesystem`,
+      options: {
+        name: `static-data`,
+        path: `${__dirname}/static/data/`, // static/data/のJSONファイルも含める
+      },
+    },
     `gatsby-transformer-json`,
   
   ],
