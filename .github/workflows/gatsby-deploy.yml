@@ -92,6 +92,10 @@ jobs:
         run: |
           echo "Build completed. Contents of public directory:"
           ls -la public/
+          echo "Assets in public (should exist if static/Assets copied correctly):"
+          ls -la public/Assets/ || echo "❌ Assets directory not found in public"
+          echo "Data in public:"
+          ls -la public/data/ || echo "❌ Data directory not found in public"
           echo "Total size:"
           du -sh public/
           

@@ -4,39 +4,8 @@ import CraftingTodo from "./CraftingTodo";
 import { CraftingProvider } from "../context/CraftingContext";
 import { withPrefix } from "gatsby";
 
-// GitHub Pages対応: 静的ファイルへのパスを修正
-let craftingDataRaw: any = {};
-
-// データの動的読み込み（GitHub Pages対応）
-if (typeof window !== "undefined") {
-  // ブラウザ環境でのみ実行
-  const loadCraftingData = async () => {
-    try {
-      const response = await fetch(withPrefix('/data/crafting_data.json'));
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return await response.json();
-    } catch (error) {
-      console.error('Failed to load crafting data:', error);
-      // フォールバック: ローカルファイル
-      try {
-        return require("../data/crafting_data.json");
-      } catch (localError) {
-        console.error('Failed to load local crafting data:', localError);
-        return {};
-      }
-    }
-  };
-} else {
-  // サーバーサイド（ビルド時）
-  try {
-    craftingDataRaw = require("../data/crafting_data.json");
-  } catch (error) {
-    console.error('Failed to load crafting data during build:', error);
-    craftingDataRaw = {};
-  }
-}
+// ビルド時にデータを埋め込む方式（シンプル）
+const craftingDataRaw = require("../data/crafting_data.json");
 
 // クラフトデータの型定義
 type CraftingItem = {
@@ -59,53 +28,8 @@ type CraftingItem = {
 type CraftingData = Record<string, CraftingItem>;
 
 const CraftingList: React.FC = () => {
-  const [craftingData, setCraftingData] = useState<CraftingData>(craftingDataRaw as CraftingData);
-  const [isLoading, setIsLoading] = useState(typeof window !== "undefined");
-
-  React.useEffect(() => {
-    if (typeof window !== "undefined" && Object.keys(craftingData).length === 0) {
-      const loadData = async () => {
-        try {
-          const response = await fetch(withPrefix('/data/crafting_data.json'));
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-          setCraftingData(data);
-          console.log('CraftingList: Loaded data with', Object.keys(data).length, 'items from API');
-        } catch (error) {
-          console.error('Failed to load crafting data:', error);
-          // フォールバック: 既存のローカルデータを使用
-          try {
-            const localData = require("../data/crafting_data.json");
-            setCraftingData(localData);
-            console.log('CraftingList: Loaded local data with', Object.keys(localData).length, 'items');
-          } catch (localError) {
-            console.error('Failed to load local crafting data:', localError);
-          }
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      loadData();
-    } else {
-      setIsLoading(false);
-      console.log('CraftingList: Using build-time data with', Object.keys(craftingData).length, 'items');
-    }
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="p-6 bg-slate-900 min-h-screen">
-        <div className="max-w-full mx-auto">
-          <h1 className="text-3xl font-bold text-yellow-300 mb-6">Bitcraft Wiki - Loading...</h1>
-          <div className="text-center py-12">
-            <div className="text-slate-400 text-lg">Loading crafting data...</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const craftingData = craftingDataRaw as CraftingData;
+  console.log('CraftingList: Loaded data with', Object.keys(craftingData).length, 'items');
 
   return (
     <CraftingProvider craftingData={craftingData}>
